@@ -350,6 +350,44 @@ Ask:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+### 5.4 Common Deployment Issues & Fixes
+
+| Issue | Symptom | Fix |
+|-------|---------|-----|
+| **Missing Tailwind CSS** | `Cannot find module 'tailwindcss'` | `npm install tailwindcss@^3.4.0` (use v3 for PostCSS compatibility) |
+| **Tailwind v4 PostCSS Error** | `The PostCSS plugin has moved to a separate package` | Downgrade to Tailwind v3: `npm uninstall tailwindcss && npm install tailwindcss@^3.4.0` |
+| **Port in use** | `Port 3000 is in use` | Next.js auto-increments port (3001, 3002...) or kill process: `lsof -ti:3000 \| xargs kill` |
+| **Backend port conflict** | `Address already in use` | Use alternate port: `uvicorn app.main:app --port 8001` |
+| **Missing npm dependencies** | `sh: next: command not found` | Run `npm install` before `npm run dev` |
+| **PostCSS config error** | CSS compilation fails | Ensure `postcss.config.js` has: `{ plugins: { tailwindcss: {}, autoprefixer: {} } }` |
+
+### 5.5 Deployment Verification Steps
+
+After fixing any deployment issues:
+
+1. **Verify backend is running**:
+   ```bash
+   curl http://localhost:8001/health
+   # Should return: {"status": "healthy", ...}
+   ```
+
+2. **Verify frontend is running**:
+   ```bash
+   curl -s -o /dev/null -w "%{http_code}" http://localhost:3003
+   # Should return: 200
+   ```
+
+3. **Run frontend tests after fixes**:
+   ```bash
+   cd frontend && npm test
+   # All tests should pass
+   ```
+
+4. **Manually test in browser**:
+   - Open frontend URL (e.g., http://localhost:3003)
+   - Verify page loads without errors
+   - Test basic functionality
+
 ---
 
 ## Quick Reference Commands
