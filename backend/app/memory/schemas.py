@@ -4,7 +4,7 @@ Defines structures for working, short-term, and long-term memory.
 """
 
 from datetime import date, datetime, time
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -122,7 +122,7 @@ class ShortTermMemory(BaseModel):
     """
 
     user_id: str = Field(..., description="Unique user identifier")
-    date: date = Field(..., description="Date of this record")
+    record_date: date = Field(..., description="Date of this record")
 
     meals: List[MealLog] = Field(default_factory=list)
     workouts: List[WorkoutLog] = Field(default_factory=list)
@@ -161,5 +161,5 @@ class MemoryUpdate(BaseModel):
     """Request to update user memory."""
 
     field: str = Field(..., description="Field to update")
-    value: any = Field(..., description="New value")
+    value: Any = Field(..., description="New value")
     source: str = Field(default="user", description="Update source: user, system, inferred")

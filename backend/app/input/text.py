@@ -18,6 +18,12 @@ class ProcessedQuery(BaseModel):
     safety_message: Optional[str] = None
 
 
+class SafetyCheckResult(BaseModel):
+    """Result of safety check."""
+    is_safe: bool
+    reason: Optional[str] = None
+
+
 class TextProcessor:
     """
     Process and sanitize text input.
@@ -138,6 +144,20 @@ class TextProcessor:
                 )
 
         return True, None
+
+    def check_safety(self, text: str) -> SafetyCheckResult:
+        """
+        Public method to check if query is safe.
+
+        Args:
+            text: Input text.
+
+        Returns:
+            SafetyCheckResult with is_safe flag and reason.
+        """
+        cleaned = self._clean(text)
+        is_safe, message = self._check_safety(cleaned)
+        return SafetyCheckResult(is_safe=is_safe, reason=message)
 
     def _extract_intents(self, text: str) -> List[str]:
         """
