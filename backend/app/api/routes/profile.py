@@ -20,10 +20,13 @@ class ProfileCreate(BaseModel):
     age: int = Field(..., ge=13, le=100, description="Age in years")
     height_cm: float = Field(..., gt=0, le=300, description="Height in cm")
     weight_kg: float = Field(..., gt=0, le=500, description="Weight in kg")
+    gender: str = Field(default="prefer_not_to_say", description="Gender")
 
     injuries: List[str] = Field(default_factory=list, description="Current injuries")
     intolerances: List[str] = Field(default_factory=list, description="Food intolerances")
     allergies: List[str] = Field(default_factory=list, description="Food allergies")
+    health_conditions: List[str] = Field(default_factory=list, description="Medical conditions")
+    medications: List[str] = Field(default_factory=list, description="Current medications")
 
     dietary_pref: str = Field(default="omnivore", description="Dietary preference")
     fitness_level: str = Field(default="beginner", description="Fitness level")
@@ -37,10 +40,13 @@ class ProfileUpdate(BaseModel):
     age: Optional[int] = Field(default=None, ge=13, le=100)
     height_cm: Optional[float] = Field(default=None, gt=0, le=300)
     weight_kg: Optional[float] = Field(default=None, gt=0, le=500)
+    gender: Optional[str] = Field(default=None)
 
     injuries: Optional[List[str]] = Field(default=None)
     intolerances: Optional[List[str]] = Field(default=None)
     allergies: Optional[List[str]] = Field(default=None)
+    health_conditions: Optional[List[str]] = Field(default=None)
+    medications: Optional[List[str]] = Field(default=None)
 
     dietary_pref: Optional[str] = Field(default=None)
     fitness_level: Optional[str] = Field(default=None)
@@ -55,10 +61,13 @@ class ProfileResponse(BaseModel):
     age: int
     height_cm: float
     weight_kg: float
+    gender: str = "prefer_not_to_say"
 
     injuries: List[str]
     intolerances: List[str]
     allergies: List[str]
+    health_conditions: List[str] = []
+    medications: List[str] = []
 
     dietary_pref: str
     fitness_level: str
@@ -105,9 +114,12 @@ async def get_profile(user_id: str) -> ProfileResponse:
         age=profile.age,
         height_cm=profile.height_cm,
         weight_kg=profile.weight_kg,
+        gender=getattr(profile, 'gender', 'prefer_not_to_say'),
         injuries=profile.injuries,
         intolerances=profile.intolerances,
         allergies=profile.allergies,
+        health_conditions=getattr(profile, 'health_conditions', []),
+        medications=getattr(profile, 'medications', []),
         dietary_pref=profile.dietary_pref,
         fitness_level=profile.fitness_level,
         primary_goal=profile.primary_goal,
@@ -158,9 +170,12 @@ async def create_profile(user_id: str, profile_data: ProfileCreate) -> ProfileRe
         age=profile.age,
         height_cm=profile.height_cm,
         weight_kg=profile.weight_kg,
+        gender=getattr(profile, 'gender', 'prefer_not_to_say'),
         injuries=profile.injuries,
         intolerances=profile.intolerances,
         allergies=profile.allergies,
+        health_conditions=getattr(profile, 'health_conditions', []),
+        medications=getattr(profile, 'medications', []),
         dietary_pref=profile.dietary_pref,
         fitness_level=profile.fitness_level,
         primary_goal=profile.primary_goal,
@@ -218,9 +233,12 @@ async def update_profile(user_id: str, profile_data: ProfileUpdate) -> ProfileRe
         age=profile.age,
         height_cm=profile.height_cm,
         weight_kg=profile.weight_kg,
+        gender=getattr(profile, 'gender', 'prefer_not_to_say'),
         injuries=profile.injuries,
         intolerances=profile.intolerances,
         allergies=profile.allergies,
+        health_conditions=getattr(profile, 'health_conditions', []),
+        medications=getattr(profile, 'medications', []),
         dietary_pref=profile.dietary_pref,
         fitness_level=profile.fitness_level,
         primary_goal=profile.primary_goal,

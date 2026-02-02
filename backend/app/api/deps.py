@@ -51,11 +51,21 @@ def get_working_store() -> WorkingMemoryStore:
         WorkingMemoryStore: Redis or in-memory session store.
     """
     settings = get_settings()
-    return WorkingMemoryStore(
-        redis_host=settings.redis_host,
-        redis_port=settings.redis_port,
-        redis_db=settings.redis_db
-    )
+
+    # Try to connect to Redis, fall back to in-memory if unavailable
+    redis_client = None
+    try:
+        import redis
+        redis_client = redis.Redis(
+            host=settings.redis_host,
+            port=settings.redis_port,
+            db=settings.redis_db
+        )
+        redis_client.ping()  # Test connection
+    except Exception:
+        redis_client = None  # Use in-memory fallback
+
+    return WorkingMemoryStore(redis_client=redis_client)
 
 
 def get_memory_retriever() -> MemoryRetriever:

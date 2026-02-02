@@ -1,8 +1,13 @@
 /**
  * API client for communicating with the backend.
+ * Uses centralized HTTP client for consistent error handling.
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { post, get, put, HttpError } from './http';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 /**
  * Chat request payload.
@@ -94,166 +99,85 @@ export interface UserProfile {
   target_weight_kg?: number;
 }
 
-/**
- * API error response.
- */
-export interface ApiError {
-  detail: string;
-}
+// Re-export HttpError for consumers
+export { HttpError };
+
+// ============================================================================
+// Chat API
+// ============================================================================
 
 /**
  * Send a chat message to the API.
- *
- * @param request - Chat request payload
- * @returns Promise resolving to chat response
  */
-export async function sendMessage(request: ChatRequest): Promise<ChatResponse> {
-  const response = await fetch(`${API_URL}/api/chat`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(request),
-  });
-
-  if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new Error(error.detail || 'Failed to send message');
-  }
-
-  return response.json();
+export function sendMessage(request: ChatRequest): Promise<ChatResponse> {
+  return post<ChatResponse>('/api/chat', request);
 }
+
+// ============================================================================
+// Voice API
+// ============================================================================
 
 /**
  * Transcribe voice audio to text.
- *
- * @param request - Voice request with audio data
- * @returns Promise resolving to transcription result
  */
-export async function transcribeVoice(request: VoiceRequest): Promise<VoiceResponse> {
-  const response = await fetch(`${API_URL}/api/voice/transcribe`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(request),
-  });
-
-  if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new Error(error.detail || 'Failed to transcribe audio');
-  }
-
-  return response.json();
+export function transcribeVoice(request: VoiceRequest): Promise<VoiceResponse> {
+  return post<VoiceResponse>('/api/voice/transcribe', request);
 }
+
+// ============================================================================
+// Image API
+// ============================================================================
 
 /**
  * Analyze a food image.
- *
- * @param request - Image request with base64 data
- * @returns Promise resolving to image analysis result
  */
-export async function analyzeImage(request: ImageRequest): Promise<ImageResponse> {
-  const response = await fetch(`${API_URL}/api/image/analyze`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(request),
-  });
-
-  if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new Error(error.detail || 'Failed to analyze image');
-  }
-
-  return response.json();
+export function analyzeImage(request: ImageRequest): Promise<ImageResponse> {
+  return post<ImageResponse>('/api/image/analyze', request);
 }
+
+// ============================================================================
+// Profile API
+// ============================================================================
 
 /**
  * Get user profile.
- *
- * @param userId - User identifier
- * @returns Promise resolving to user profile or null if not found
+ * Returns null if profile doesn't exist (404).
  */
 export async function getProfile(userId: string): Promise<UserProfile | null> {
-  const response = await fetch(`${API_URL}/api/profile/${userId}`);
-
-  if (response.status === 404) {
-    return null;
+  try {
+    return await get<UserProfile>(`/api/profile/${userId}`);
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 404) {
+      return null;
+    }
+    throw error;
   }
-
-  if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new Error(error.detail || 'Failed to get profile');
-  }
-
-  return response.json();
 }
 
 /**
  * Create user profile.
- *
- * @param userId - User identifier
- * @param profile - Profile data
- * @returns Promise resolving to created profile
  */
-export async function createProfile(
+export function createProfile(
   userId: string,
   profile: Omit<UserProfile, 'user_id'>
 ): Promise<UserProfile> {
-  try {
-    const response = await fetch(`${API_URL}/api/profile/${userId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(profile),
-    });
-
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-      try {
-        const error: ApiError = await response.json();
-        errorMessage = error.detail || errorMessage;
-      } catch {
-        // JSON parsing failed, use status text
-      }
-      throw new Error(errorMessage);
-    }
-
-    return response.json();
-  } catch (err) {
-    if (err instanceof Error) {
-      throw err;
-    }
-    throw new Error('Network error: Failed to create profile');
-  }
+  return post<UserProfile>(`/api/profile/${userId}`, profile);
 }
 
 /**
  * Update user profile.
- *
- * @param userId - User identifier
- * @param updates - Partial profile updates
- * @returns Promise resolving to updated profile
  */
-export async function updateProfile(
+export function updateProfile(
   userId: string,
   updates: Partial<UserProfile>
 ): Promise<UserProfile> {
-  const response = await fetch(`${API_URL}/api/profile/${userId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(updates),
-  });
+  return put<UserProfile>(`/api/profile/${userId}`, updates);
+}
 
-  if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new Error(error.detail || 'Failed to update profile');
-  }
-
-  return response.json();
+/**
+ * Delete user profile.
+ */
+export async function deleteProfile(userId: string): Promise<void> {
+  const { del } = await import('./http');
+  await del(`/api/profile/${userId}`);
 }

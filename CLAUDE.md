@@ -1,7 +1,8 @@
 # CLAUDE.md - Project Context for AI Assistants
 
+> **Version**: V0 (Functional MVP)
 > **Last Updated**: 2026-02-01
-> **Change Log**: See `notes/CHANGELOG.md` for detailed history
+> **Next Focus**: User Experience Enhancement for Power Users
 
 ---
 
@@ -10,6 +11,56 @@
 **Adaptive Adolescent Coaching Platform (AACP)** - A multi-agent RAG application providing holistic health coaching (nutrition, fitness, recovery) for adolescents aged 16-19.
 
 **Core Differentiator**: Three-tier memory system with query-aware retrieval that learns and adapts over time.
+
+**Target Power User**: Neha - Teen athlete seeking personalized, adaptive coaching that feels like chatting with a knowledgeable friend.
+
+---
+
+## V0 Status: What's Built
+
+| Component | Status | Description |
+|-----------|--------|-------------|
+| Multi-Agent System | ✅ | Trainer, Nutritionist, Recovery coaches |
+| Three-Tier Memory | ✅ | Working, Short-term, Long-term |
+| Auto Model Routing | ✅ | Haiku/Sonnet/Opus based on complexity |
+| Voice Input | ✅ | Whisper transcription |
+| Image Analysis | ✅ | Food photo analysis via Claude Vision |
+| Conversational Prompts | ✅ | Friendly, teen-appropriate tone |
+| Safety Checks | ✅ | Harmful content filtering |
+| User Profiles | ✅ | Injuries, allergies, goals |
+
+---
+
+## UX Improvement Roadmap (Making Neha a Power User)
+
+### Phase 1: Onboarding Experience
+- [ ] Guided onboarding wizard (not just text input)
+- [ ] Visual goal selection (muscle building, weight loss, etc.)
+- [ ] Injury/allergy picker with common options
+- [ ] Profile photo and personalization
+
+### Phase 2: Conversation Flow
+- [ ] Quick action buttons ("Log meal", "Start workout", "Check sleep")
+- [ ] Suggested follow-ups after each response
+- [ ] Progress indicators (weekly streaks, goals met)
+- [ ] Rich message formatting (tables, charts for macros)
+
+### Phase 3: Engagement & Retention
+- [ ] Daily check-ins with push notifications
+- [ ] Weekly progress summaries
+- [ ] Achievement badges and milestones
+- [ ] Workout/meal plan scheduling
+
+### Phase 4: Advanced Features
+- [ ] Workout timer with rest period alerts
+- [ ] Meal prep reminders
+- [ ] Sleep schedule optimization
+- [ ] Integration with fitness trackers (future)
+
+### Phase 5: Social & Community
+- [ ] Share progress with friends
+- [ ] Community challenges
+- [ ] Leaderboards (optional)
 
 ---
 
@@ -20,13 +71,12 @@
 | Frontend | React + Next.js 14 | App router, Tailwind CSS |
 | Backend | Python + FastAPI | Async, Pydantic validation |
 | Agent Orchestration | LangGraph | StateGraph for multi-agent workflow |
-| LLM | Claude Sonnet 4 | Reasoning + Vision capabilities |
+| LLM | Claude (Haiku/Sonnet/Opus) | Auto-routed by complexity |
 | Embeddings | sentence-transformers | all-MiniLM-L6-v2 (local, free) |
 | Vector Store | ChromaDB | Local persistence |
 | Database | SQLite | Memory persistence |
 | Cache | Redis | With in-memory fallback |
 | Speech-to-Text | Whisper API | OpenAI |
-| Observability | Langfuse | Self-hosted (free) |
 | Testing | pytest / Jest | Backend / Frontend |
 
 ---
@@ -37,27 +87,25 @@
 RAG Applicaion/
 ├── backend/
 │   ├── app/
-│   │   ├── core/           # ✅ Config, utilities
-│   │   ├── memory/         # ✅ Three-tier memory system
-│   │   ├── retrieval/      # ✅ RAG pipeline (embed, search)
-│   │   ├── ingestion/      # ✅ Document loading, chunking
-│   │   ├── tools/          # ✅ Agent tools (food DB, exercise DB)
-│   │   ├── input/          # ✅ Voice, image, text processing
-│   │   ├── agents/         # ✅ LangGraph agents
-│   │   └── api/            # ✅ FastAPI routes
+│   │   ├── core/           # Config, exceptions, utilities
+│   │   ├── memory/         # Three-tier memory system
+│   │   ├── retrieval/      # RAG pipeline (embed, search)
+│   │   ├── ingestion/      # Document loading, chunking
+│   │   ├── tools/          # Agent tools (food DB, exercise DB)
+│   │   ├── input/          # Voice, image, text processing
+│   │   ├── agents/         # LangGraph agents + model router
+│   │   └── api/            # FastAPI routes
 │   └── tests/
-│       ├── unit/           # ✅ Unit tests (84+ tests)
-│       ├── integration/    # ✅ Cross-module tests (19 tests)
-│       └── e2e/            # ✅ End-to-end tests (7 tests)
-├── frontend/               # ✅ Next.js app
+│       ├── unit/           # Unit tests (93+ tests)
+│       ├── integration/    # Cross-module tests (19 tests)
+│       └── e2e/            # End-to-end tests (7 tests)
+├── frontend/
 │   └── src/
 │       ├── app/            # Pages (page.tsx, layout.tsx)
 │       ├── components/     # Chat, VoiceInput, ImageUpload
 │       ├── hooks/          # useChat, useVoice
-│       └── lib/            # API client
-├── notes/                  # 📝 Project notes & changelog
-│   ├── CHANGELOG.md        # CLAUDE.md change history
-│   └── BUILD_LOG.md        # Detailed build log
+│       └── lib/            # API client, HTTP utilities
+├── notes/                  # Project notes & changelog
 ├── PRD.md                  # Product requirements
 ├── SYSTEM_DESIGN.md        # Technical design
 └── CLAUDE.md               # This file
@@ -65,41 +113,41 @@ RAG Applicaion/
 
 ---
 
-## Build Status
+## Key Architecture
 
-| Module | Status | Tests | Key Files |
-|--------|--------|-------|-----------|
-| Memory | ✅ Complete | 20 | schemas.py, working.py, short_term.py, long_term.py, retriever.py |
-| Retrieval | ✅ Complete | 10 | embedder.py, vectorstore.py, search.py |
-| Ingestion | ✅ Complete | 10 | loader.py, chunker.py |
-| Tools | ✅ Complete | 10 | food_db.py, exercise_db.py, calculators.py |
-| Input | ✅ Complete | 10 | voice.py, image.py, text.py |
-| Agents | ✅ Complete | 10 | router.py, trainer.py, nutritionist.py, recovery.py, graph.py |
-| API Routes | ✅ Complete | 14 | main.py, deps.py, chat.py, voice.py, image.py, profile.py |
-| Frontend | ✅ Complete | - | Chat.tsx, VoiceInput.tsx, ImageUpload.tsx |
-| Integration | ✅ Complete | 19 | test_memory_retrieval.py, test_input_agents.py, test_api_flow.py |
-| E2E | ✅ Complete | 7 | test_user_journeys.py |
+### Auto Model Routing
+```
+┌─────────────────────────────────────────────────────────┐
+│                    MODEL ROUTER                          │
+├─────────────────────────────────────────────────────────┤
+│  "Hi" / "Thanks"  →  Haiku (fast, cheap)               │
+│  "What to eat?"   →  Sonnet (balanced)                 │
+│  "Weekly plan"    →  Opus (complex reasoning)          │
+└─────────────────────────────────────────────────────────┘
+```
 
-**Total Tests**: 176 passing (unit + integration + e2e)
+### Multi-Agent System
+```
+         ┌──────────────┐
+         │ MODEL ROUTER │ ← Selects LLM
+         └──────┬───────┘
+                ▼
+         ┌──────────────┐
+         │ AGENT ROUTER │ ← Classifies intent
+         └──────┬───────┘
+      ┌─────────┼─────────┐
+      ▼         ▼         ▼
+┌─────────┐ ┌─────────┐ ┌─────────┐
+│ TRAINER │ │NUTRITION│ │RECOVERY │
+└────┬────┘ └────┬────┘ └────┬────┘
+      └─────────┼─────────┘
+                ▼
+         ┌──────────────┐
+         │    MERGE     │ → Combined response
+         └──────────────┘
+```
 
----
-
-## API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/chat` | POST | Multi-agent chat with safety checks |
-| `/api/voice/transcribe` | POST | Whisper audio transcription |
-| `/api/image/analyze` | POST | Claude Vision food analysis |
-| `/api/profile/{user_id}` | GET/POST/PUT/DELETE | User profile CRUD |
-| `/api/profile/{user_id}/injury` | POST | Add injury to profile |
-| `/health` | GET | Application health check |
-
----
-
-## Key Architecture Decisions
-
-### 1. Three-Tier Memory System
+### Three-Tier Memory
 ```
 ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
 │   WORKING   │    │  SHORT-TERM  │    │  LONG-TERM  │
@@ -111,88 +159,49 @@ RAG Applicaion/
 └─────────────┘    └──────────────┘    └─────────────┘
 ```
 
-### 2. Query-Aware Memory Retrieval
-Memory retriever analyzes query intent and fetches only relevant context:
-- **Workout query** → injuries, recent workouts, fitness level
-- **Food query** → intolerances, recent meals, dietary preferences
-- **Sleep query** → sleep logs, recent workouts
+---
 
-### 3. Multi-Agent Architecture (LangGraph)
-```
-           ┌─────────┐
-           │ ROUTER  │ ← Classifies intent
-           └────┬────┘
-      ┌─────────┼─────────┐
-      ▼         ▼         ▼
-┌─────────┐ ┌─────────┐ ┌─────────┐
-│ TRAINER │ │NUTRITION│ │RECOVERY │
-└────┬────┘ └────┬────┘ └────┬────┘
-      └─────────┼─────────┘
-                ▼
-           ┌─────────┐
-           │  MERGE  │ → Combined response
-           └─────────┘
-```
+## API Endpoints
 
-### 4. No Fine-tuning Policy
-All personalization achieved via:
-- RAG retrieval from knowledge base
-- Tool calling for real-time data (USDA, exercise DBs)
-- Prompt injection with user memory context
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/chat` | POST | Multi-agent chat with auto model routing |
+| `/api/voice/transcribe` | POST | Whisper audio transcription |
+| `/api/image/analyze` | POST | Claude Vision food analysis |
+| `/api/profile/{user_id}` | GET/POST/PUT/DELETE | User profile CRUD |
+| `/health` | GET | Application health check |
 
 ---
 
-## Development Patterns
+## Recent Refactoring (V0)
 
-### Module Structure
-```python
-# One class per file, <100 lines
-# Docstrings on every function
-# Type hints throughout
-# 5 edge cases per component
-```
+### Backend
+- **Centralized exceptions** (`app/core/exceptions.py`) - Hierarchical error classes
+- **Model router** (`app/agents/model_router.py`) - Auto LLM selection
+- **Greeting handler** - Single response for simple queries
+- **Conversational prompts** - Friendly, teen-appropriate tone
 
-### Testing Strategy
-- Unit tests first, then integration
-- Test file mirrors source structure
-- Mock external dependencies
-
-### Git Workflow
-- Feature branches per module
-- Worktrees for parallel development (3 max)
-- Merge to main only after tests pass
+### Frontend
+- **HTTP client** (`lib/http.ts`) - Centralized fetch with error handling
+- **Refactored API** (`lib/api.ts`) - Clean, typed API calls
+- **Removed manual model selector** - Now auto-selected by backend
 
 ---
 
 ## Commands
 
 ```bash
-# Backend
-cd backend
+# Start backend
+cd backend && uvicorn app.main:app --reload --port 8000
 
-# Run all unit tests
-pytest tests/unit/ -v
+# Start frontend
+cd frontend && npm run dev
 
-# Run specific module tests
-pytest tests/unit/test_memory/ -v
+# Run all tests
+cd backend && pytest tests/ -v
 
-# Run with coverage
-pytest --cov=app tests/
-
-# Start API server
-uvicorn app.main:app --reload
-
-# Frontend
-cd frontend
-
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
+# Build frontend
+cd frontend && npm run build
 ```
 
 ---
@@ -205,45 +214,28 @@ ANTHROPIC_API_KEY=     # For Claude LLM
 OPENAI_API_KEY=        # For Whisper STT
 
 # Optional
-REDIS_HOST=localhost   # Falls back to in-memory
+REDIS_HOST=localhost
 REDIS_PORT=6379
-DEBUG=false            # Enable debug logging
-API_PORT=8000
+DEBUG=false
 ```
 
 ---
 
-## Free APIs Used
+## For Claude: Planning Next Steps
 
-| API | Purpose | Rate Limits |
-|-----|---------|-------------|
-| USDA FoodData Central | Nutrition lookup | 1000/hour |
-| wger.de | Exercise database | Unlimited |
-| DuckDuckGo Search | Web fallback | Reasonable use |
+When planning UX improvements for Neha:
 
----
+1. **Understand her journey**: New user → Regular user → Power user
+2. **Reduce friction**: Quick actions > typing, visual > text
+3. **Build habits**: Streaks, reminders, progress tracking
+4. **Personalize**: Remember preferences, adapt to patterns
+5. **Delight**: Celebrate wins, encouraging tone, fun interactions
 
-## Current Sprint
-
-**Status**: ✅ All phases complete - Deployed to GitHub
-
-**Completed**:
-1. [x] Integration Tests - Cross-module testing (19 tests)
-2. [x] E2E Tests - Full conversation flow (7 tests)
-3. [x] Local Deployment - Backend verified running on port 8001
-4. [x] Git Push - Pushed to GitHub repository
-
----
-
-## Completed Phases
-
-| Phase | Modules | Tests | Date |
-|-------|---------|-------|------|
-| Phase 1 | Memory, Retrieval, Ingestion | 40 | 2026-02-01 |
-| Phase 2 | Tools, Input, Agents | 30 | 2026-02-01 |
-| Phase 3 | API Routes, Frontend | 14 | 2026-02-01 |
-| Phase 4 | Integration Tests, E2E Tests | 26 | 2026-02-01 |
-| Phase 5 | Local Deployment, Git Push | - | 2026-02-01 |
+### Key Questions to Explore
+- How does Neha typically interact with the app? (Morning check-in? Post-workout?)
+- What makes her come back daily?
+- What frustrates her about current health apps?
+- How can we make logging meals/workouts feel rewarding, not tedious?
 
 ---
 
@@ -253,32 +245,8 @@ API_PORT=8000
 
 ---
 
-## Notes Directory
+## Notes
 
-For detailed logs and history, see the `notes/` directory:
-- `notes/CHANGELOG.md` - Change history for this file
-- `notes/BUILD_LOG.md` - Detailed build log with decisions
-
----
-
-## Quick Reference
-
-**Start the app**:
-```bash
-# Terminal 1: Backend
-cd backend && uvicorn app.main:app --reload
-
-# Terminal 2: Frontend
-cd frontend && npm run dev
-```
-
-**Run tests**:
-```bash
-cd backend && pytest tests/unit/ -v
-```
-
-**Key files to understand**:
-1. `backend/app/memory/retriever.py` - Query-aware memory
-2. `backend/app/agents/graph.py` - LangGraph workflow
-3. `backend/app/api/routes/chat.py` - Main chat endpoint
-4. `frontend/src/components/Chat.tsx` - Chat UI
+See `notes/` directory for:
+- `CHANGELOG.md` - Version history
+- `BUILD_LOG.md` - Development decisions

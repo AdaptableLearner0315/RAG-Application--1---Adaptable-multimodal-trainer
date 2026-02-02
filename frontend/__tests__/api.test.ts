@@ -33,7 +33,7 @@ describe('API Client', () => {
 
       expect(result).toEqual(mockResponse);
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/api/chat',
+        'http://localhost:8001/api/chat',
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

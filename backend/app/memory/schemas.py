@@ -28,6 +28,9 @@ class LongTermMemory(BaseModel):
     injuries: List[str] = Field(default_factory=list, description="Current injuries")
     intolerances: List[str] = Field(default_factory=list, description="Food intolerances")
     allergies: List[str] = Field(default_factory=list, description="Food allergies")
+    health_conditions: List[str] = Field(default_factory=list, description="Medical conditions like diabetes, hypertension, etc.")
+    medications: List[str] = Field(default_factory=list, description="Current medications")
+    gender: str = Field(default="prefer_not_to_say", description="Gender: male, female, other, prefer_not_to_say")
 
     # Preferences
     dietary_pref: str = Field(

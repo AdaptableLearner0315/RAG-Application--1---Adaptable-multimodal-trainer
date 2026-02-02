@@ -93,7 +93,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
 
     # Get memory context
     retriever = get_memory_retriever()
-    memory_context = retriever.retrieve_for_query(user_id, request.message)
+    memory_context = retriever.retrieve_for_query(user_id, session_id, request.message)
 
     # Update working memory with this message
     working_store = get_working_store()
