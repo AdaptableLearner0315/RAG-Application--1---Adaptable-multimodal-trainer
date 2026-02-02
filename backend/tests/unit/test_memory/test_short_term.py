@@ -85,7 +85,7 @@ class TestShortTermMemoryStore:
 
         result = store.get_recent(user_id, days=7)
         assert len(result) == 1
-        assert result[0].date == boundary_date
+        assert result[0].record_date == boundary_date
 
     # ==================== EDGE CASE 4: Negative values rejected ====================
     def test_log_meal_negative_calories_raises_error(self, store: ShortTermMemoryStore):
@@ -192,7 +192,7 @@ class TestShortTermMemoryStore:
 
         result = store.get_day(user_id, target_date)
         assert result is not None
-        assert result.date == target_date
+        assert result.record_date == target_date
 
     def test_get_day_nonexistent_returns_none(self, store: ShortTermMemoryStore):
         """Test getting nonexistent day returns None."""

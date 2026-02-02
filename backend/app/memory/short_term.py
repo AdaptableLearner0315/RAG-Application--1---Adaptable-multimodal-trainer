@@ -79,7 +79,7 @@ class ShortTermMemoryStore:
             data = json.loads(row["data"])
             return ShortTermMemory(**data)
 
-        return ShortTermMemory(user_id=user_id, date=log_date)
+        return ShortTermMemory(user_id=user_id, record_date=log_date)
 
     def _save_daily(self, memory: ShortTermMemory) -> None:
         """Save daily log to database."""
@@ -93,7 +93,7 @@ class ShortTermMemoryStore:
                     updated_at = excluded.updated_at
             """, (
                 memory.user_id,
-                memory.date.isoformat(),
+                memory.record_date.isoformat(),
                 memory.model_dump_json(),
                 now
             ))
