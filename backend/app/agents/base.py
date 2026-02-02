@@ -36,20 +36,35 @@ class BaseAgent(ABC):
         self.name = name
         self.description = description
         self.system_prompt = system_prompt
-        self._llm = None
+        self._llm_cache: Dict[str, ChatAnthropic] = {}
 
-    @property
-    def llm(self) -> ChatAnthropic:
-        """Lazy load LLM."""
-        if self._llm is None:
-            settings = get_settings()
-            self._llm = ChatAnthropic(
-                model=settings.llm_model,
+    def get_llm(self, model: Optional[str] = None) -> ChatAnthropic:
+        """
+        Get LLM instance for specified model.
+
+        Args:
+            model: Model name. If None, uses default from settings.
+
+        Returns:
+            ChatAnthropic instance.
+        """
+        settings = get_settings()
+        model_name = model or settings.llm_model
+
+        if model_name not in self._llm_cache:
+            self._llm_cache[model_name] = ChatAnthropic(
+                model=model_name,
                 api_key=settings.anthropic_api_key,
                 max_tokens=settings.llm_max_tokens,
                 temperature=settings.llm_temperature
             )
-        return self._llm
+
+        return self._llm_cache[model_name]
+
+    @property
+    def llm(self) -> ChatAnthropic:
+        """Lazy load default LLM (for backward compatibility)."""
+        return self.get_llm()
 
     def process(self, state: AgentState) -> AgentState:
         """
@@ -64,8 +79,11 @@ class BaseAgent(ABC):
         # Build context-aware prompt
         full_prompt = self._build_prompt(state)
 
+        # Get model from state (set by model router)
+        model = state.get("model")
+
         # Generate response
-        response = self._generate_response(full_prompt, state["query"])
+        response = self._generate_response(full_prompt, state["query"], model)
 
         # Store response
         state["agent_responses"][self.name] = response
@@ -102,13 +120,19 @@ class BaseAgent(ABC):
 
         return "\n".join(parts)
 
-    def _generate_response(self, system_prompt: str, query: str) -> str:
+    def _generate_response(
+        self,
+        system_prompt: str,
+        query: str,
+        model: Optional[str] = None
+    ) -> str:
         """
         Generate response using LLM.
 
         Args:
             system_prompt: Full system prompt.
             query: User query.
+            model: Optional model override from state.
 
         Returns:
             Generated response text.
@@ -119,7 +143,8 @@ class BaseAgent(ABC):
         ]
 
         try:
-            response = self.llm.invoke(messages)
+            llm = self.get_llm(model)
+            response = llm.invoke(messages)
             return response.content
         except Exception as e:
             return f"I apologize, but I encountered an issue: {str(e)}"

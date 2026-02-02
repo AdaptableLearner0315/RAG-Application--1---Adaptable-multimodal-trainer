@@ -12,6 +12,7 @@ from app.agents.router import route_query
 from app.agents.trainer import run_trainer
 from app.agents.nutritionist import run_nutritionist
 from app.agents.recovery import run_recovery_coach
+from app.agents.model_router import route_to_model
 
 
 def should_continue(state: AgentState) -> Literal["continue", "end"]:
@@ -104,14 +105,18 @@ def build_agent_graph() -> StateGraph:
     workflow = StateGraph(AgentState)
 
     # Add nodes
+    workflow.add_node("model_router", route_to_model)
     workflow.add_node("router", route_query)
     workflow.add_node("trainer", run_trainer)
     workflow.add_node("nutritionist", run_nutritionist)
     workflow.add_node("recovery", run_recovery_coach)
     workflow.add_node("merge", merge_responses)
 
-    # Set entry point
-    workflow.set_entry_point("router")
+    # Set entry point - model routing first
+    workflow.set_entry_point("model_router")
+
+    # Model router always goes to agent router
+    workflow.add_edge("model_router", "router")
 
     # Add conditional edges from router
     workflow.add_conditional_edges(

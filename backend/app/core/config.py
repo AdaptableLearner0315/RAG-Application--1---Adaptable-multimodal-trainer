@@ -25,6 +25,9 @@ class Settings(BaseSettings):
 
     # LLM Configuration
     llm_model: str = "claude-sonnet-4-20250514"
+    llm_model_haiku: str = "claude-3-haiku-20240307"
+    llm_model_sonnet: str = "claude-sonnet-4-20250514"
+    llm_model_opus: str = "claude-opus-4-20250514"
     llm_max_tokens: int = 4096
     llm_temperature: float = 0.7
 

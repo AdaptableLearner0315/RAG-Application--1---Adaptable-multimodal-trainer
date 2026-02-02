@@ -18,6 +18,7 @@ export interface Message {
 
 /**
  * Chat state and actions.
+ * Note: Model is auto-selected by backend based on query complexity.
  */
 export interface UseChatReturn {
   messages: Message[];

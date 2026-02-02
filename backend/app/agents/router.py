@@ -4,7 +4,7 @@ Determines which agent(s) should handle a query.
 """
 
 import re
-from typing import List
+from typing import List, Optional
 
 from app.agents.state import AgentState
 
@@ -60,6 +60,17 @@ HARMFUL_PATTERNS = [
     r"lose\s+\d+\s+pounds?\s+in\s+(one|two|\d)\s+(day|week)"
 ]
 
+# Simple greeting/conversational patterns
+GREETING_PATTERNS = [
+    "hi", "hello", "hey", "hiya", "howdy",
+    "good morning", "good afternoon", "good evening", "good night",
+    "thanks", "thank you", "thx", "ty",
+    "bye", "goodbye", "see you", "later",
+    "ok", "okay", "sure", "yes", "no", "yep", "nope",
+    "cool", "great", "nice", "awesome", "perfect",
+    "how are you", "what's up", "sup", "wassup",
+]
+
 
 class QueryRouter:
     """
@@ -86,7 +97,7 @@ class QueryRouter:
         Returns:
             Updated state with selected_agents populated.
         """
-        query = state["query"].lower()
+        query = state["query"].lower().strip()
 
         # Check for harmful queries
         if self._is_harmful(query):
@@ -104,6 +115,13 @@ class QueryRouter:
                 "I'm your health and fitness coach, so I can help with "
                 "nutrition, workouts, and recovery. What would you like to know?"
             )
+            return state
+
+        # Check for simple greetings/conversational queries
+        greeting_response = self._handle_greeting(query)
+        if greeting_response:
+            state["selected_agents"] = []
+            state["final_response"] = greeting_response
             return state
 
         # Extract intents and map to agents
@@ -128,6 +146,49 @@ class QueryRouter:
     def _is_off_topic(self, query: str) -> bool:
         """Check if query is off-topic."""
         return any(p.search(query) for p in self.off_topic_regex)
+
+    def _handle_greeting(self, query: str) -> Optional[str]:
+        """
+        Handle simple greetings with a friendly response.
+
+        Args:
+            query: Lowercase query string.
+
+        Returns:
+            Greeting response or None if not a greeting.
+        """
+        query_clean = query.strip().rstrip("!?.").strip()
+
+        # Check if the query is a simple greeting
+        if query_clean in GREETING_PATTERNS or len(query_clean) < 10:
+            # Categorize the greeting type
+            if any(g in query_clean for g in ["hi", "hello", "hey", "hiya", "howdy", "morning", "afternoon", "evening"]):
+                return (
+                    "Hey there! I'm your personal health coach - here to help with "
+                    "workouts, nutrition, and recovery. What would you like to work on today?"
+                )
+            elif any(g in query_clean for g in ["thanks", "thank", "thx", "ty"]):
+                return (
+                    "You're welcome! Let me know if there's anything else I can help you with - "
+                    "whether it's workouts, meals, or recovery tips."
+                )
+            elif any(g in query_clean for g in ["bye", "goodbye", "later", "see you"]):
+                return (
+                    "Take care! Remember to stay hydrated and get good sleep. "
+                    "Come back anytime you need coaching advice!"
+                )
+            elif any(g in query_clean for g in ["how are you", "what's up", "sup", "wassup"]):
+                return (
+                    "I'm doing great, thanks for asking! Ready to help you crush your health goals. "
+                    "What can I help you with - fitness, nutrition, or recovery?"
+                )
+            elif any(g in query_clean for g in ["ok", "okay", "sure", "yes", "yep", "cool", "great", "nice", "awesome", "perfect"]):
+                return (
+                    "Sounds good! What would you like to focus on next? "
+                    "I'm here for workout advice, meal ideas, or recovery tips."
+                )
+
+        return None
 
     def _extract_agents(self, query: str) -> List[str]:
         """Extract relevant agents based on query keywords."""

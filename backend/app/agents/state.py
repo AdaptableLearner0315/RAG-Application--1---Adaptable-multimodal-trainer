@@ -37,6 +37,9 @@ class AgentState(TypedDict):
     selected_agents: List[str]
     current_agent: Optional[str]
 
+    # Model selection (auto-routed based on query complexity)
+    model: str
+
     # Response accumulation
     agent_responses: Dict[str, str]
     final_response: Optional[str]
@@ -74,6 +77,7 @@ def create_initial_state(
         retrieved_docs=[],
         selected_agents=[],
         current_agent=None,
+        model="claude-sonnet-4-20250514",  # Default, will be updated by model router
         agent_responses={},
         final_response=None,
         timestamp=datetime.utcnow().isoformat(),

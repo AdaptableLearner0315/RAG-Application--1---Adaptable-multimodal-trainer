@@ -6,6 +6,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 /**
  * Chat request payload.
+ * Note: Model is auto-selected by backend based on query complexity.
  */
 export interface ChatRequest {
   message: string;
@@ -81,9 +82,12 @@ export interface UserProfile {
   age: number;
   height_cm: number;
   weight_kg: number;
+  gender: string;
   injuries: string[];
   intolerances: string[];
   allergies: string[];
+  health_conditions: string[];
+  medications: string[];
   dietary_pref: string;
   fitness_level: string;
   primary_goal: string;
@@ -198,20 +202,33 @@ export async function createProfile(
   userId: string,
   profile: Omit<UserProfile, 'user_id'>
 ): Promise<UserProfile> {
-  const response = await fetch(`${API_URL}/api/profile/${userId}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(profile),
-  });
+  try {
+    const response = await fetch(`${API_URL}/api/profile/${userId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(profile),
+    });
 
-  if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new Error(error.detail || 'Failed to create profile');
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const error: ApiError = await response.json();
+        errorMessage = error.detail || errorMessage;
+      } catch {
+        // JSON parsing failed, use status text
+      }
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  } catch (err) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw new Error('Network error: Failed to create profile');
   }
-
-  return response.json();
 }
 
 /**
